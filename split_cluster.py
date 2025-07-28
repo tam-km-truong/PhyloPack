@@ -23,10 +23,11 @@ def split():
     
     args = get_args()
     seed = args.seed if args.seed is not None else SEED_DEFAULT
+    input_basename = os.path.splitext(os.path.basename(args.input_genomes))[0]
     cut_arg = args.cut_point
 
     with open(args.input_genomes, 'r') as infile:
-        genome_list = [line.strip() for line in infile if line.strip()]
+        genome_list = infile.readlines()
 
     n_genomes = len(genome_list)
 
@@ -53,8 +54,8 @@ def split():
     reference_genomes = genome_list[:cut_point]
     remaining_genomes = genome_list[cut_point:]
 
-    ref_path = os.path.join(args.output, 'references.txt')
-    rem_path = os.path.join(args.output, 'remains.txt')
+    ref_path = os.path.join(args.output, f'references_{input_basename}.txt')
+    rem_path = os.path.join(args.output, f'remains_{input_basename}.txt')
 
     with open(ref_path, 'w') as out_reference:
         for gen in reference_genomes:
