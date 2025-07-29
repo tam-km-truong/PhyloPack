@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'phylopack=phylopack.phylopack:main',
+            'phylopack=phylopack.cli:main',
         ]
     },
     install_requires=[],
