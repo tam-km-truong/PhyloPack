@@ -1,7 +1,15 @@
 # cli.py
-
+import shutil
+import sys
 import argparse
 from phylopack.preorder.preorder import add_preorder_parser
+
+
+def check_dependencies(tools=["mash", "quicktree", "attotree"]):
+    missing = [tool for tool in tools if shutil.which(tool) is None]
+    if missing:
+        print(f"Required external tools: {', '.join(missing)}", file=sys.stderr)
+        sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser(prog="phylopack", description="Phylopack CLI")
@@ -14,4 +22,5 @@ def main():
     args.func(args)
 
 if __name__ == "__main__":
+    check_dependencies()
     main()
