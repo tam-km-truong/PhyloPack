@@ -64,6 +64,7 @@ def mash_sketch(genomes_list, output, k, s, t, verbose = False):
     }
 
 def mash_distance(sketch_1, sketch_2, t, output_path, verbose=False):
+    
     if verbose:
         print(f"Calculating Mash distance between {sketch_1} and {sketch_2}")
 
@@ -72,8 +73,8 @@ def mash_distance(sketch_1, sketch_2, t, output_path, verbose=False):
 
     cmd = [
         'mash', 'dist',
-        f'{sketch_1}.msh',
-        f'{sketch_2}.msh',
+        f'{sketch_2}.msh', # reference first
+        f'{sketch_1}.msh', # remaining
         '-p', str(t),
         '-t'
     ]    
@@ -155,12 +156,10 @@ def run_placement(args):
     
     with open(args.genomes_list_2) as f:
         col_names = [os.path.basename(line.strip()).split('.')[0] for line in f]    
-    
-    print(len(col_names))
 
     argmin_result, grouping_time = argmin(distance_file, row_names, col_names, args.verbose)
 
-    preorder_file = os.path.join(args.output, f"{os.path.basename(args.genomes_list_1)}_preorder.txt")
+    preorder_file = os.path.join(args.output, f"placement_order.txt")
     # Preorder writing
     if args.verbose:
         print(f"Writing preorder result to file")
