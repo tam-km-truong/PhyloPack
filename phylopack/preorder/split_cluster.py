@@ -11,7 +11,7 @@ import resource
 SEED_DEFAULT = int(datetime.now().timestamp())
 
 def add_split_args(parser):
-    parser.add_argument('input-genomes', help='Path to the input list of genomes')
+    parser.add_argument('input_genomes', help='Path to the input list of genomes')
     parser.add_argument('cut-point', help='Cut size: float < 1 for percentage, int ≥ 1 for number of genomes', type=float)
     parser.add_argument('-o', '--output', help='Output path (default: current folder)', default='.')
     parser.add_argument('--seed', type=int, help='Seed for random function (default: current timestamp)')
@@ -62,14 +62,10 @@ def run_split(args):
     reference_genomes = genome_list[:cut_point]
     remaining_genomes = genome_list[cut_point:]
 
-    ref_name = args.ref_output if args.ref_output else f'references_{input_basename}.txt'
-    rem_name = args.rem_output if args.rem_output else f'remains_{input_basename}.txt'
-    ref_path = os.path.join(args.output, ref_name)
-    rem_path = os.path.join(args.output, rem_name)
+    ref_path = args.ref_output if args.ref_output else os.path.join(args.output, f'references_{input_basename}.txt')
+    rem_path = args.rem_output if args.rem_output else os.path.join(args.output, f'remains_{input_basename}.txt')
 
-    ref_path = os.path.join(args.output, f'references_{input_basename}.txt')
-    rem_path = os.path.join(args.output, f'remains_{input_basename}.txt')
-
+    print(ref_path)
     with open(ref_path, 'w') as out_reference:
         for gen in reference_genomes:
             out_reference.write(gen)

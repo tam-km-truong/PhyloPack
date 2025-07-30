@@ -11,12 +11,12 @@ import csv
 SEED_DEFAULT = int(datetime.now().timestamp())
 
 def add_placement_args(parser):
-    parser.add_argument('genomes-list-1', help='Path to query genomes (to be placed)')
-    parser.add_argument('genomes-list-2', help='Path to reference genomes (anchors)')
+    parser.add_argument('genomes_list_1', help='Path to query genomes (to be placed)')
+    parser.add_argument('genomes_list_2', help='Path to reference genomes (anchors)')
     parser.add_argument('-o', '--output', help='Output folder (default: current folder)', default='.')
     parser.add_argument('-v','--verbose', action='store_true', help='Print logs')
     parser.add_argument('-k', type=int, default=21, help='K-mer size (default: 21)')
-    parser.add_argument('-s', type=int, default=10000, help='Sketch size (default: 10000)')
+    parser.add_argument('-s', type=int, default=1000, help='Sketch size (default: 1000)')
     parser.add_argument('-t', type=int, default=10, help='Number of threads (default: 10)')
     parser.add_argument('--statistic', action='store_true', help='Output json statistics file')
     parser.add_argument(
@@ -49,7 +49,10 @@ def mash_sketch(genomes_list, output, k, s, t, verbose = False):
         '-p', str(t),
     ]    
 
-    subprocess.run(cmd, capture_output=True, text=True, check=True)
+    print("Running mash sketch with:")
+    print(" ".join(cmd))
+
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, text=True, check=True)
 
     end = time.time()
     cpu_end = os.times()
@@ -153,6 +156,8 @@ def run_placement(args):
     with open(args.genomes_list_2) as f:
         col_names = [os.path.basename(line.strip()).split('.')[0] for line in f]    
     
+    print(len(col_names))
+
     argmin_result, grouping_time = argmin(distance_file, row_names, col_names, args.verbose)
 
     preorder_file = os.path.join(args.output, f"{os.path.basename(args.genomes_list_1)}_preorder.txt")

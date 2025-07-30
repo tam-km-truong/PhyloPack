@@ -7,9 +7,11 @@ import json
 import csv
 import resource
 from pathlib import Path
+import sys
+from phylopack.preorder.postprocess_tree import run as postprocesstree
 
 def add_tree_args(parser):
-    parser.add_argument('input-genomes', help='Path to the input list of genomes')
+    parser.add_argument('input_genomes', help='Path to the input list of genomes')
     parser.add_argument('-o', '--output', help='Output path (default: current folder)', default='.')
     parser.add_argument('-k', type=int, default=21, help='K-mer size (default: 21)')
     parser.add_argument('-s', type=int, default=10000, help='Sketch size (default: 10000)')
@@ -72,16 +74,19 @@ def run_attotree(args):
     attotree_log = result.stdout + result.stderr  
 
     # Run postprocess_tree.py
-    cmd_postprocess = [
-        "python", "postprocess_tree.py",
-        "--standardize", "--midpoint-outgroup", "--ladderize", "--name-internals",
-        "-l", leaf_order,
-        "-n", node_order,
-        output_tree,
-        output_std_tree
-    ]
+    # cmd_postprocess = [
+    #     "python", "postprocess_tree.py",
+    #     "--standardize", "--midpoint-outgroup", "--ladderize", "--name-internals",
+    #     "-l", leaf_order,
+    #     "-n", node_order,
+    #     output_tree,
+    #     output_std_tree
+    # ]
 
-    subprocess.run(cmd_postprocess,capture_output=False, check=True)
+
+    # subprocess.run(cmd_postprocess,capture_output=False, check=True)
+
+    postprocesstree(output_tree, output_std_tree, True, True, True, True, leaf_order, node_order)
 
     # Re-add full paths to leaf_order.txt
 
@@ -90,18 +95,19 @@ def run_attotree(args):
     with open(input_path) as f:
         for line in f:
             basename = os.path.basename(line.strip())
-            genome_acession = Path(basename).stem
+            genome_acession = Path(basename).name.split('.')[0]
             path_map[genome_acession] = line.strip()
-
+    
     # Patch leaf_order.txt in-place
     with open(leaf_order) as f:
         leaves = [line.strip() for line in f]
 
     missing = [leaf for leaf in leaves if leaf not in path_map]
     if missing:
-        print("Warning: some leaves not found in input list:")
+        print("Error: some leaves not found in input list:")
         for m in missing:
             print("  ", m)
+        sys.exit(1)  # Exit with error code 1
 
     with open(leaf_order, 'w') as f:
         for leaf in leaves:
