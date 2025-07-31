@@ -2,11 +2,13 @@ import argparse
 import tempfile
 import os
 import shutil
-import glob
+import json
+import csv
+from pathlib import Path
 
-from .split_cluster import run_split
-from .py_attotree import run_attotree
-from .placement import run_placement
+from phylopack.preorder.split_cluster import run_split
+from phylopack.preorder.py_attotree import run_attotree
+from phylopack.preorder.placement import run_placement
 
 def add_preorder_parser(subparsers):
     preorder_parser = subparsers.add_parser("preorder", help="Run full pipeline")
@@ -36,8 +38,28 @@ def _add_common_args(parser):
 
     parser.set_defaults(func=run_preorder_pipeline)
 
-def concat_stat_files(tmpdir, output_path, file_type="json"):
-    pass
+def concat_stat_files(paths, output_path, file_type="json"):
+    if file_type == 'json':
+        merged = {}
+        for path in paths:
+            name = Path(path).stem
+            with open(path) as f:
+                merged[name] = (json.load(f))
+        with open(output_path, "w") as out:
+            json.dump(merged, out, indent=4)
+    elif file_type == 'csv':
+        with open(output_path, "w", newline="") as out_csv:
+            writer = None
+            for path in paths:
+                name = Path(path).stem
+                with open(path, newline="") as in_csv:
+                    reader = csv.reader(in_csv)
+                    headers = next(reader)
+                    if writer is None:
+                        writer = csv.writer(out_csv)
+                        writer.writerow(['stat_file'] + headers )
+                    for row in reader:
+                        writer.writerow([name] + row)
 
 def run_preorder_pipeline(args):
     if args.debug:
@@ -107,6 +129,18 @@ def run_preorder_pipeline(args):
 
     if args.verbose:
         print(f"[INFO] Preorder written to {args.output}")
+
+    if args.statistic:
+        stat_paths = [
+            os.path.join(tmpdir, "split_stats." + args.statistic_file_type),
+            os.path.join(tmpdir, "tree_stats." + args.statistic_file_type),
+            os.path.join(tmpdir, "placement_stats." + args.statistic_file_type),
+        ]
+
+        merged_stat = os.path.join(os.path.dirname(args.output), f"preorder.stat.{args.statistic_file_type}")
+        concat_stat_files(stat_paths, merged_stat, args.statistic_file_type)
+        if args.verbose:
+            print(f"[INFO] Statistic written to {merged_stat}")
 
     if not args.debug:
         shutil.rmtree(tmpdir)

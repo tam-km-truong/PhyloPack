@@ -146,7 +146,7 @@ def run_attotree(args):
     }
 
     if args.statistic:
-        stats_path = os.path.join(args.output, f"{output_basename}_stats.{args.statistic_file_type}")
+        stats_path = os.path.join(args.output, f"tree_stats.{args.statistic_file_type}")
         if args.statistic_file_type == 'json':
             with open(stats_path, 'w') as f:
                 json.dump(stats, f, indent=2)

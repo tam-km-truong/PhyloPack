@@ -198,7 +198,7 @@ def run_placement(args):
     }
     if args.statistic:
         input_basename = os.path.splitext(os.path.basename(args.genomes_list_2))[0]
-        stats_path = os.path.join(args.output, f"split_stats_{input_basename}.{args.statistic_file_type}")
+        stats_path = os.path.join(args.output, f"placement_stats.{args.statistic_file_type}")
         if args.statistic_file_type == 'json':
 
             with open(stats_path, 'w') as f:

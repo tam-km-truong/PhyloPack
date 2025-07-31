@@ -101,7 +101,7 @@ def run_split(args):
     }
 
     if args.statistic:
-        stats_path = os.path.join(args.output, f"split_stats_{input_basename}.{args.statistic_file_type}")
+        stats_path = os.path.join(args.output, f"split_stats.{args.statistic_file_type}")
         if args.statistic_file_type == 'json':
             with open(stats_path, 'w') as f:
                 json.dump(stats, f, indent=2)
