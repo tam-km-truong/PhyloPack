@@ -76,7 +76,11 @@ def run_split(args):
 
     wall_end = time.time()
     cpu_end = os.times()
-    usage = resource.getrusage(resource.RUSAGE_SELF)
+    usage = resource.getrusage(resource.RUSAGE_SELF)    
+
+    if args.verbose:
+        print(f'Splitted into {len(reference_genomes)} and {len(remaining_genomes)} lists')
+        print(f'Splitting elapsed time: {round(wall_end - wall_start, 4)}s')
 
     stats = {
         "parameters": {

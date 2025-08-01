@@ -196,8 +196,11 @@ def run_placement(args):
         'user_time': full_cpu_end.user - full_cpu_start.user,
         'system_time': full_cpu_end.system - full_cpu_start.system
     }
+
+    if args.verbose:
+        print(f'Placement elapsed time: {round(full_end - full_start, 4)}s')
+
     if args.statistic:
-        input_basename = os.path.splitext(os.path.basename(args.genomes_list_2))[0]
         stats_path = os.path.join(args.output, f"placement_stats.{args.statistic_file_type}")
         if args.statistic_file_type == 'json':
 

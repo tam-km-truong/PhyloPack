@@ -121,6 +121,8 @@ def run_attotree(args):
     mash_time = get_duration(attotree_log.splitlines(), 'Running Mash', "Finished: 'mash triangle")
     quicktree_time = get_duration(attotree_log.splitlines(), 'Running Quicktree', "Finished: 'quicktree")
 
+    if args.verbose:
+        print(f'Tree inference elapsed time: {round(wall_end - wall_start, 4)}s')
 
     stats = {
         "parameters": {
