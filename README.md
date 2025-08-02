@@ -12,7 +12,7 @@ pip install .
 
 ### Requirements
 
-* Python >= 3.8
+* `Python >= 3.8`
 * `mash`
 * `quicktree`
 * `attotree`
