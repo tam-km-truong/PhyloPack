@@ -66,7 +66,8 @@ def run_preorder_pipeline(args):
         tmpdir = os.path.join(os.path.dirname(args.output), "phylopack_tmp")
         os.makedirs(tmpdir, exist_ok=True)
     else:
-         tmpdir = tempfile.mkdtemp()
+        os.makedirs(os.path.dirname(args.output), exist_ok=True)
+        tmpdir = tempfile.mkdtemp()
 
     if args.verbose:
         print(f'[INFO] Temp directory at: {tmpdir}')
