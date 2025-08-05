@@ -30,7 +30,7 @@ def add_placement_args(parser):
 def mash_sketch(genomes_list, output, k, s, t, verbose = False):
 
     if verbose:
-        print(f"Sketching genomes from: {genomes_list}")
+        print(f"[INFO] Sketching genomes from: {genomes_list}")
 
     basename = os.path.splitext(os.path.basename(genomes_list))[0]
     sketch = os.path.join(output, f"{basename}")
@@ -49,7 +49,7 @@ def mash_sketch(genomes_list, output, k, s, t, verbose = False):
         '-p', str(t),
     ]    
 
-    print("Running mash sketch with:")
+    print("[INFO] Running mash sketch with:")
     print(" ".join(cmd))
 
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, text=True, check=True)
@@ -66,7 +66,7 @@ def mash_sketch(genomes_list, output, k, s, t, verbose = False):
 def mash_distance(sketch_1, sketch_2, t, output_path, verbose=False):
     
     if verbose:
-        print(f"Calculating Mash distance between {sketch_1} and {sketch_2}")
+        print(f"[INFO] Calculating Mash distance between {sketch_1} and {sketch_2}")
 
     start = time.time()
     cpu_start = os.times()
@@ -96,7 +96,7 @@ def mash_distance(sketch_1, sketch_2, t, output_path, verbose=False):
 def argmin(distance_file, rows, cols, verbose = False):
 
     if verbose:
-        print(f"Finding argmin from distance file: {distance_file}")
+        print(f"[INFO] Finding argmin from distance file: {distance_file}")
 
     start = time.time()
     cpu_start = os.times()
@@ -162,7 +162,7 @@ def run_placement(args):
     preorder_file = os.path.join(args.output, f"placement_order.txt")
     # Preorder writing
     if args.verbose:
-        print(f"Writing preorder result to file")
+        print(f"[INFO] Writing preorder result to file")
     with open(preorder_file, 'w') as preorder_file:
         for col in col_names:
             preorder_file.write(col + '\n')
@@ -198,7 +198,7 @@ def run_placement(args):
     }
 
     if args.verbose:
-        print(f'Placement elapsed time: {round(full_end - full_start, 4)}s')
+        print(f'[INFO] Placement elapsed time: {round(full_end - full_start, 4)}s')
 
     if args.statistic:
         stats_path = os.path.join(args.output, f"placement_stats.{args.statistic_file_type}")
@@ -222,7 +222,7 @@ def run_placement(args):
                 for k, v in stats["resources"].items():
                     writer.writerow(["resource", k, v])      
         if args.verbose:
-            print(f"Statistics saved to: {stats_path}")      
+            print(f"[INFO] Statistics saved to: {stats_path}")      
 
 def main():
     parser = argparse.ArgumentParser(

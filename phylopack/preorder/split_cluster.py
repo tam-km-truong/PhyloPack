@@ -37,7 +37,7 @@ def run_split(args):
     n_genomes = len(genome_list)
 
     if args.verbose:
-        print('Splitting genomes')
+        print('[INFO] Splitting genomes')
 
     wall_start = time.time()
     cpu_start = os.times()
@@ -79,8 +79,8 @@ def run_split(args):
     usage = resource.getrusage(resource.RUSAGE_SELF)    
 
     if args.verbose:
-        print(f'Splitted into {len(reference_genomes)} and {len(remaining_genomes)} lists')
-        print(f'Splitting elapsed time: {round(wall_end - wall_start, 4)}s')
+        print(f'[INFO] Splitted into {len(reference_genomes)} and {len(remaining_genomes)} lists')
+        print(f'[INFO] Splitting elapsed time: {round(wall_end - wall_start, 4)}s')
 
     stats = {
         "parameters": {
@@ -120,7 +120,7 @@ def run_split(args):
                 for k, v in stats['resources'].items():
                     writer.writerow(['resource', k, v])
         if args.verbose:
-            print(f"Statistics saved to: {stats_path}")
+            print(f"[INFO] Statistics saved to: {stats_path}")
 
 
 def main():

@@ -54,7 +54,7 @@ def run_attotree(args):
 
 
     if args.verbose:
-        print(f"Running attotree on {input_path}...")
+        print(f"[INFO] Running attotree on {input_path}...")
     wall_start = time.time()
     cpu_start = os.times()
 
@@ -122,7 +122,7 @@ def run_attotree(args):
     quicktree_time = get_duration(attotree_log.splitlines(), 'Running Quicktree', "Finished: 'quicktree")
 
     if args.verbose:
-        print(f'Tree inference elapsed time: {round(wall_end - wall_start, 4)}s')
+        print(f'[INFO] Tree inference elapsed time: {round(wall_end - wall_start, 4)}s')
 
     stats = {
         "parameters": {
@@ -167,7 +167,7 @@ def run_attotree(args):
                 for k, v in stats['resources'].items():
                     writer.writerow(['resource', k, v])
         if args.verbose:
-            print(f"Statistics saved to: {stats_path}")
+            print(f"[INFO] Statistics saved to: {stats_path}")
 
 def main():
     parser = argparse.ArgumentParser(
