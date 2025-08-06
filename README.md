@@ -13,8 +13,6 @@ pip install .
 ### Requirements
 
 * `Python >= 3.8`
-* `mash`
-* `quicktree`
 * `attotree`
 
 Make sure the above tools are installed and available in your `PATH`.
