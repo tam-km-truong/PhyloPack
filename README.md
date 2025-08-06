@@ -22,7 +22,7 @@ Make sure the above tools are installed and available in your `PATH`.
 ## Usage
 
 ```bash
-phylopack preorder input-genomes.txt -o output.txt
+phylopack preorder tests/data/genomes.txt --cut-point 0.2 -o ./debug/out.txt -v
 ```
 
 For available options:
