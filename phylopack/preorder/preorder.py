@@ -138,7 +138,10 @@ def run_preorder_pipeline(args):
             os.path.join(tmpdir, "placement_stats." + args.statistic_file_type),
         ]
 
-        merged_stat = os.path.join(os.path.dirname(args.output), f"preorder.stat.{args.statistic_file_type}")
+        basename = os.path.splitext(os.path.basename(args.input_genomes))[0]
+
+
+        merged_stat = os.path.join(os.path.dirname(args.output), f"preorder_stat_{basename}_{args.cut_point}.{args.statistic_file_type}")
         concat_stat_files(stat_paths, merged_stat, args.statistic_file_type)
         if args.verbose:
             print(f"[INFO] Statistic written to {merged_stat}")
