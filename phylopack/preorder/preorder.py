@@ -140,8 +140,12 @@ def run_preorder_pipeline(args):
 
         basename = os.path.splitext(os.path.basename(args.input_genomes))[0]
 
+        cutpoint = args.cut_point
 
-        merged_stat = os.path.join(os.path.dirname(args.output), f"preorder_stat_{basename}_{args.cut_point}.{args.statistic_file_type}")
+        if cutpoint >= 1:
+            cutpoint = int(cutpoint)
+
+        merged_stat = os.path.join(os.path.dirname(args.output), f"preorder_stat_{basename}_{cutpoint}.{args.statistic_file_type}")
         concat_stat_files(stat_paths, merged_stat, args.statistic_file_type)
         if args.verbose:
             print(f"[INFO] Statistic written to {merged_stat}")
