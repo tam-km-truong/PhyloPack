@@ -30,7 +30,7 @@ def _add_common_args(parser):
     parser.add_argument("-m", choices=["nj", "upgma"], default="nj", help="Tree method (default: nj)")
     parser.add_argument("--statistic", action="store_true", help="Enable statistics")
     parser.add_argument(
-        "--statistic-file-type", choices=["json", "csv"], default="json",
+        "--statistic-file-type", choices=["json", "csv"], default="csv",
         help="Statistics file format (default: json)"
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging")
