@@ -203,7 +203,6 @@ def run_placement(args):
     if args.statistic:
         stats_path = os.path.join(args.output, f"placement_stats.{args.statistic_file_type}")
         if args.statistic_file_type == 'json':
-
             with open(stats_path, 'w') as f:
                 json.dump(stats, f, indent=2)
         elif args.statistic_file_type == 'csv':
@@ -220,7 +219,17 @@ def run_placement(args):
                         writer.writerow(["timing", f"{k}.{sub_k}", sub_v])
 
                 for k, v in stats["resources"].items():
-                    writer.writerow(["resource", k, v])      
+                    writer.writerow(["resource", k, v])
+
+        placement_groups = os.path.join(args.output, f"skeleton_tree.tsv")
+
+        with open(placement_groups, 'w') as ske_tree:
+            for col in col_names:
+                ske_tree.write(col + '\t')
+                for val in argmin_result[col]:
+                    ske_tree.write(val + '\t')
+                ske_tree.write('\n')
+              
         if args.verbose:
             print(f"[INFO] Statistics saved to: {stats_path}")      
 

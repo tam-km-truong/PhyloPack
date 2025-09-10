@@ -19,6 +19,7 @@ def _add_common_args(parser):
     parser.add_argument("input_genomes", help="Path to input genome list")
     parser.add_argument("-o", "--output", required=True, help="Output file for final genome preorder list")
     parser.add_argument(
+        '-c',
         "--cut-point", type=float, default=0.01,
         help="Cut size: float <1 for percentage, int ≥1 for number (default: 0.01)"
     )
