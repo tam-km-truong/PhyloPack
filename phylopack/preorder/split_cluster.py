@@ -54,10 +54,8 @@ def run_split(args):
     else:
         if 0 < args.cut_point < 1:
             cut_point = int(args.cut_point * n_genomes)
-            cut_mode = "fraction"
         elif args.cut_point >= 1:
             cut_point = int(args.cut_point)
-            cut_mode = "count"
             if cut_point > n_genomes:
                 print(f"Warning: requested {cut_point} genomes but only {n_genomes} available. Taking all.")
                 cut_point = n_genomes
