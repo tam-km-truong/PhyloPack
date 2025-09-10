@@ -35,6 +35,9 @@ def _add_common_args(parser):
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging")
     parser.add_argument("--debug", action="store_true", help="Keep temp files for debugging")
+    parser.add_argument('--splitting-scheme',choices=['random', 'nth-accession', 'custom'], default='random', help='The splitting scheme to select the reference genomes')
+    parser.add_argument('--nth', type=int, help = 'Select every nth genomes, sorted by accession number')
+    parser.add_argument('--custom-ref', help='Path to the custom list of genomes as reference, required path to genome files')
 
     parser.set_defaults(func=run_preorder_pipeline)
 
@@ -86,6 +89,9 @@ def run_preorder_pipeline(args):
         output=tmpdir,
         seed=args.seed,
         verbose=args.verbose,
+        splitting_scheme=args.splitting_scheme,
+        nth=args.nth,
+        custom_ref=args.custom_ref,
         statistic=args.statistic,
         statistic_file_type=args.statistic_file_type,
         ref_output=ref_file,
@@ -138,14 +144,14 @@ def run_preorder_pipeline(args):
             os.path.join(tmpdir, "placement_stats." + args.statistic_file_type),
         ]
 
-        basename = os.path.splitext(os.path.basename(args.input_genomes))[0]
+        basename = os.path.splitext(os.path.basename(args.output))[0]
 
         cutpoint = args.cut_point
 
         if cutpoint >= 1:
             cutpoint = int(cutpoint)
 
-        merged_stat = os.path.join(os.path.dirname(args.output), f"preorder_stat_{basename}_{cutpoint}.{args.statistic_file_type}")
+        merged_stat = os.path.join(os.path.dirname(args.output), f"preorder_stat_{basename}_{cutpoint}_{args.splitting_scheme}.{args.statistic_file_type}")
         concat_stat_files(stat_paths, merged_stat, args.statistic_file_type)
         if args.verbose:
             print(f"[INFO] Statistic written to {merged_stat}")
@@ -157,6 +163,11 @@ def main():
     parser = argparse.ArgumentParser(description="Run full preorder pipeline")
     _add_common_args(parser)
     args = parser.parse_args()
+    # Conditional checks
+    if args.splitting_scheme == 'nth-accession' and args.nth is None:
+        parser.error("--nth is required for nth-accession scheme")
+    if args.splitting_scheme == 'custom' and not args.custom_ref:
+        parser.error("--custom-ref is required for custom scheme")
     run_preorder_pipeline(args)
 
 if __name__ == "__main__":
