@@ -52,8 +52,6 @@ def run_attotree(args):
     leaf_order = args.leaf_order or os.path.join(args.output, f"{output_basename}_leaf_order.txt")
     node_order = args.node_order or os.path.join(args.output, f"{output_basename}_node.txt")
 
-    os.makedirs(os.path.dirname(args.output), exist_ok=True)
-
     if args.verbose:
         print(f"[INFO] Running attotree on {input_path}...")
     wall_start = time.time()
