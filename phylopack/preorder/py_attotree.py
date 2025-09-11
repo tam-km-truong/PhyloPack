@@ -20,7 +20,7 @@ def add_tree_args(parser):
     parser.add_argument('-v','--verbose', action='store_true', help='Print logs')
     parser.add_argument('--statistic', action='store_true', help='Output statistics file')
     parser.add_argument(
-        '--statistic_file_type',
+        '--statistic-file-type',
         choices=['json', 'csv'],
         default='json',
         help='Output statistics format: json or csv (default: json)'
@@ -52,6 +52,7 @@ def run_attotree(args):
     leaf_order = args.leaf_order or os.path.join(args.output, f"{output_basename}_leaf_order.txt")
     node_order = args.node_order or os.path.join(args.output, f"{output_basename}_node.txt")
 
+    os.makedirs(os.path.dirname(args.output), exist_ok=True)
 
     if args.verbose:
         print(f"[INFO] Running attotree on {input_path}...")
