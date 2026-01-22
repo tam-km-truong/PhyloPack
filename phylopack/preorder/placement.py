@@ -152,10 +152,11 @@ def run_placement(args):
     ### Grouping and writing to output
 
     with open(args.genomes_list_1) as f:
-        row_names = [os.path.basename(line.strip()).split('.')[0] for line in f]    
+        row_names = ['.'.join(os.path.basename(line.strip()).split('.')[:-1]) for line in f]    
     
     with open(args.genomes_list_2) as f:
-        col_names = [os.path.basename(line.strip()).split('.')[0] for line in f]    
+        col_names = ['.'.join(os.path.basename(line.strip()).split('.')[:-1]) for line in f]    
+
 
     argmin_result, grouping_time = argmin(distance_file, row_names, col_names, args.verbose)
 
