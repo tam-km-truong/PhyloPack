@@ -19,6 +19,7 @@ def add_placement_args(parser):
     parser.add_argument('-s', type=int, default=1000, help='Sketch size (default: 1000)')
     parser.add_argument('-t', type=int, default=10, help='Number of threads (default: 10)')
     parser.add_argument('--statistic', action='store_true', help='Output json statistics file')
+    parser.add_argument('--exclude-skeleton', action='store_true', help='Exclude the skeleton genomes')
     parser.add_argument(
         '--statistic-file-type',
         choices=['json', 'csv'],
@@ -166,7 +167,8 @@ def run_placement(args):
         print(f"[INFO] Writing preorder result to file")
     with open(preorder_file, 'w') as preorder_file:
         for col in col_names:
-            preorder_file.write(col + '\n')
+            if not args.exclude_skeleton:
+                preorder_file.write(col + '\n')
             for val in argmin_result[col]:
                 preorder_file.write(val + '\n')
 

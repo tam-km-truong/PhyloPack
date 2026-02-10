@@ -39,6 +39,7 @@ def _add_common_args(parser):
     parser.add_argument('--splitting-scheme',choices=['random', 'nth-accession', 'custom'], default='random', help='The splitting scheme to select the reference genomes')
     parser.add_argument('--nth', type=int, help = 'Select every nth genomes, sorted by accession number')
     parser.add_argument('--custom-ref', help='Path to the custom list of genomes as reference, required path to genome files')
+    parser.add_argument('--exclude-skeleton', action='store_true', help='Exclude the skeleton genomes')
 
     parser.set_defaults(func=run_preorder_pipeline)
 
@@ -129,6 +130,7 @@ def run_preorder_pipeline(args):
         verbose=args.verbose,
         statistic=args.statistic,
         statistic_file_type=args.statistic_file_type,  
+        exclude_skeleton=args.exclude_skeleton
     )
 
     run_placement(placement_args)
