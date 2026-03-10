@@ -58,7 +58,7 @@ def run_split(args):
             cut_point = int(args.cut_point)
             if cut_point > n_genomes:
                 print(f"Warning: requested {cut_point} genomes but only {n_genomes} available. Taking all.")
-                cut_point = n_genomes
+                cut_point = n_genomes-1
         else:
             print("Error: cut value must be > 0")
             sys.exit(1)        
@@ -85,7 +85,6 @@ def run_split(args):
     ref_path = args.ref_output if args.ref_output else os.path.join(args.output, f'references_{input_basename}.txt')
     rem_path = args.rem_output if args.rem_output else os.path.join(args.output, f'remains_{input_basename}.txt')
 
-    print(ref_path)
     with open(ref_path, 'w') as out_reference:
         for gen in reference_genomes:
             out_reference.write(gen)

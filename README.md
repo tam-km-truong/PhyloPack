@@ -1,6 +1,6 @@
 # PhyloPack
 
-**PhyloPack** is a tool for computing phylogenetic-based genome orderings and batching.
+**PhyloPack** is a tool for computing phylogenetic-based genome orderings.
 
 ## Installation
 
