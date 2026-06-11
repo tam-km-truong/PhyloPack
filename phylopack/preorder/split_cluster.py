@@ -28,6 +28,7 @@ def add_split_args(parser):
     parser.add_argument('--custom-ref', help='Path to the custom list of genomes as reference')
     parser.add_argument('--ref-output', help='Custom output filename for references (overrides default)')
     parser.add_argument('--rem-output', help='Custom output filename for remains (overrides default)')
+    parser.add_argument('--max-skeleton-genomes', default='20000', help = 'The max number of genomes allowed for building the skeleton phylogeny [20000]')
 
 def run_split(args):
     
@@ -62,6 +63,10 @@ def run_split(args):
         else:
             print("Error: cut value must be > 0")
             sys.exit(1)        
+
+        if cut_point > args.max_skeleton_genomes:
+            print(f"Warning: requested {cut_point} genomes but max {args.max_skeleton_genomes} genomes allowed.")
+            cut_point = int(args.max_skeleton_genomes)
         
         if args.splitting_scheme == 'random':
             random.seed(seed)
