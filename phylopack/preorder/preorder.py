@@ -31,6 +31,7 @@ def _add_common_args(parser):
     parser.add_argument("-m", choices=["nj", "upgma"], default="nj", help="Tree method (default: nj)")
     parser.add_argument("--statistic", action="store_true", help="Enable statistics")
     parser.add_argument('--max-skeleton-genomes',type=int, default='20000', help = 'The max number of genomes allowed for building the skeleton phylogeny [20000]')
+    parser.add_argument('--min-skeleton-genomes',type=int, default='5000', help = 'The min number of genomes allowed for building the skeleton phylogeny [5000]')    
     parser.add_argument(
         "--statistic-file-type", choices=["json", "csv"], default="csv",
         help="Statistics file format (default: json)"
@@ -99,7 +100,8 @@ def run_preorder_pipeline(args):
         statistic_file_type=args.statistic_file_type,
         ref_output=ref_file,
         rem_output=rem_file,
-        max_skeleton_genomes= args.max_skeleton_genomes
+        max_skeleton_genomes= args.max_skeleton_genomes,
+        min_skeleton_genomes= args.min_skeleton_genomes
     )
 
     run_split(split_args)
