@@ -9,35 +9,41 @@ def add_batch_parser(subparsers):
 
 def add_batch_args(parser):
     parser.add_argument(
-        "--input",
-        required=True,
+        "input",
         help="Ordered genome list (one genome per line)"
     )
 
     parser.add_argument(
-        "--output-dir",
+        '-o',"--output-dir",
         required=True,
         help="Directory containing batch files"
     )
 
     parser.add_argument(
-        "--target-size",
+        '-s',"--target-size",
         type=int,
         default=10000,
         help="Target number of genomes per batch"
     )
 
     parser.add_argument(
-    "--batch-name",
-    default="batch",
-    help="Prefix for batch filenames"
+        "-n", "--batch-name",
+        default="batch",
+        help="Prefix for batch filenames"
     )
 
     parser.add_argument(
-        "--digits",
+        "-d","--digits",
         type=int,
         default=3,
         help="Number of digits in batch suffix (like split -d)"
+    )
+
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print batch statistics"
     )
 
 def balanced_partition(n_items, max_batch_size):
@@ -45,6 +51,8 @@ def balanced_partition(n_items, max_batch_size):
     Split n_items into the minimum number of balanced batches
     whose sizes differ by at most 1 and never exceed max_batch_size.
     """
+    if n_items == 0:
+        return []
 
     n_batches = math.ceil(n_items / max_batch_size)
 
@@ -66,6 +74,9 @@ def run_batching(args):
         genomes = [line.strip() for line in f if line.strip()]
 
     n_genomes = len(genomes)
+
+    if args.target_size <= 0:
+        raise ValueError("--target-size must be > 0")
 
     batch_sizes = balanced_partition(
         n_genomes,
@@ -89,16 +100,17 @@ def run_batching(args):
             out.write("\n".join(batch))
             out.write("\n")
 
-        print(
-            f"{args.batch_name}_{suffix}: "
-            f"{batch_size} genomes"
-        )
+        if args.verbose:
+            print(
+                f"{args.batch_name}_{suffix}: "
+                f"{batch_size} genomes"
+            )
 
         start = end
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Splits a shuffled genome list into reference and remaining genome lists.'
+        description='Split an ordered genome list into balanced contiguous batches.'
     )
     add_batch_args(parser)
     args = parser.parse_args()
