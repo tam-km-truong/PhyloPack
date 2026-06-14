@@ -11,6 +11,14 @@ Using the ATB 2024-08 release (approx. 2.4 million genomes):
 - **< 15 GB** using MBGC [cite here] for major pathogenic species (~93% of the collection).
 - **~33 GB** using AGC [cite here] while retaining fast random-access capabilities.
 
+These results were obtained using the workflow described below.
+
+## Contents:
+- Installation
+- Quick Example
+- Main commands
+- Real application: Compression of ATB using AGC
+
 ## Installation
 
 ```bash
@@ -40,7 +48,7 @@ Input files should contain one genome path per line:
 ~/data/genome3.fa
 ```
 
-### Workflow
+### High-level Workflow
 
 1. Compute a global genome ordering using `phylopack preorder`.
 2. Split the ordered list into batches using `phylopack batch`.
@@ -56,7 +64,7 @@ Output: a text file containing the ordered genome list, one genome path per line
 ### Quick Example - Batching
 
 ```bash
-phylopack batch tests/data/genomes.txt -o debug/ -v
+phylopack batch tests/data/genomes.txt -o debug/ -s 2 -v
 ```
 
 Output: multiple batch files containing contiguous segments of the ordered genome list.
@@ -96,8 +104,8 @@ Advanced options:
 
 ```text
 -k K
--s-reference S_REFERENCE
--s-placement S_PLACEMENT
+-s-reference Sketch size for the skeleton genomes set
+-s-placement Sketch size the the placement genomes set
 --max-skeleton-genomes MAX_SKELETON_GENOMES
 --min-skeleton-genomes MIN_SKELETON_GENOMES
 --seed SEED
@@ -107,7 +115,7 @@ Advanced options:
 [...]
 ```
 
-For the complete list of options:
+For all options:
 
 ```bash
 phylopack preorder --help
@@ -151,13 +159,13 @@ phylopack batch --help
 
 On the AllTheBacteria (ATB) collection [cite here], containing millions of genomes, PhyloPack was used to generate phylogeny-aware genome orderings and batches prior to compression.
 
-Dataset scale:
+Dataset scale - ATB version 2025-05:
 
 - ~2.7 million genomes
-- [number] species 
+- ~12k species 
 - Largest cluster (*S. enterica*): ~700k genomes
 
-### 1. Species clustering
+### Species clustering
 
 First, download the ATB metadata table [link here].
 
@@ -173,7 +181,7 @@ Genomes are grouped by species using the helper script in `suppl_scripts/species
     [path_column]
 ```
 
-The default value of `min_species_size_threshold` is 100.
+The default value of `min_species_size_threshold` is 100. Species clusters containing fewer than 100 genomes are grouped into a pseudo-cluster named `remainder` for easier handling.
 
 Example:
 
@@ -181,7 +189,7 @@ Example:
 ./suppl_scripts/species_clustering.sh \
     file_list_202505.tsv \
     sample \
-    sylp_species \
+    sylph_species \
     ~/ATB/clusters/ \
     100 \
     tar_xz
@@ -189,7 +197,7 @@ Example:
 
 This step produces one genome list per species cluster.
 
-### 2. Compute a global ordering for each species
+### Compute a global ordering for each species
 
 For each species cluster, compute a PhyloPack global ordering.
 
@@ -199,7 +207,7 @@ Example for *S. enterica*:
 phylopack preorder \
     S_enterica_cluster.txt \
     --cut-point 0.05 \
-    -t 96 \
+    -t [Thread] \
     --max-skeleton-genomes 20000 \
     --min-skeleton-genomes 10000 \
     -o S_enterica_cluster_global_ordered.txt \
@@ -216,14 +224,14 @@ In this example, the skeleton set size is controlled by three parameters:
 
 For example, the *S. enterica* cluster contains approximately 700k genomes. With a cut point of 5%, the skeleton set would contain roughly 35k genomes. Because this exceeds the maximum threshold, the skeleton set is capped at 20k genomes.
 
-### 3. Refine the ordering within large clusters
+### Refine the ordering within large clusters
 
 For clusters requiring genome placement, an additional refinement step is performed after the initial global ordering. This improves local ordering accuracy within placement-heavy clusters without requiring phylogenetic inference on the entire dataset.
 
 
 The ordered genome list is divided into non-overlapping windows of 5k genomes. 
 
-This keeps each local phylogenetic inference trivial while preserving the global-scale ordering produced by PhyloPack.
+This keeps each local phylogenetic inference computationally manageable while preserving the global-scale ordering produced by PhyloPack.
 
 For each window, a local phylogenetic tree is inferred using Attotree:
 
@@ -253,7 +261,7 @@ for cluster in cluster_window*; do
 done
 ```
 
-### 4. Create balanced batches
+### Create balanced batches
 
 The refined ordering is partitioned into balanced batches:
 
@@ -266,9 +274,10 @@ phylopack batch \
     cluster_refined_order.txt
 ```
 
-This step produces contiguous batches while preserving the locality established by the ordering process.
+The target size is 5000 for most clusters, except for clusters where higher diversity is expected (e.g. unknown-species clusters and the `remainder` pseudo-cluster), where the target size is reduced to 500.
+This step aims to create contiguous batches while preserving the locality established by the ordering process.
 
-### 5. Compress each batch with AGC
+### Compress each batch with AGC
 
 Each batch is compressed independently using AGC. The first genome in the batch is used as the reference genome.
 
@@ -280,7 +289,7 @@ for f in ~/ATB/final_batches/*; do
         -a \
         -b 500 \
         -s 1500 \
-        -t 25 \
+        -t [Thread] \
         -v 2 \
         -o ~/ATB/results/agc/$(basename "$f" .txt).agc \
         -i "$f" \
@@ -289,3 +298,6 @@ done
 ```
 
 The resulting AGC archives can then be used for downstream storage and retrieval of bacterial genome collections.
+
+## Bibliography:
+
