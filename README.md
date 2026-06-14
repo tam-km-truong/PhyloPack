@@ -2,11 +2,13 @@
 
 **PhyloPack** is a protocol to facilitate the handling of million-genomes scale bacterial collections by taking advantage of phylogenetic relationships between genomes [1].
 
-It first computes a global genome ordering that places similar genomes close together, then partitions this ordering into batches suitable for downstream applications such as compression, exact k-mer indexing, or distributed processing. The approach uses a skeleton phylogeny built from a subset of skeleton genomes and subsequently places remaining genomes onto this backbone.
+Its primary output is a global genome ordering that places similar genomes close together, then this ordering could be partitioned into batches suitable for downstream applications such as compression, exact k-mer indexing, or distributed processing. The approach uses a skeleton phylogeny built from a subset of skeleton genomes and subsequently places remaining genomes onto this backbone.
 
 ### Key results
 
-Using the ATB 2024-08 release [2] (approx. 2.4 million genomes):
+Using PhyloPack, we generated evolutionary-based genome orderings for the ATB 2024-08 release [2] (approximately 2.4 million genomes).
+
+When these orderings were used for genome compression:
 
 - **< 15 GB** using MBGC [4] for major pathogenic species (~93% of the collection).
 - **~33 GB** using AGC [3] which supports random-access capabilities.
@@ -17,7 +19,7 @@ These results were obtained using the workflow described below.
 - Installation
 - Quick Example
 - Main commands
-- Real application: Compression of ATB using AGC
+- Real application: Global ordering of ATB for compression using AGC
 
 ## Installation
 
@@ -103,7 +105,7 @@ Commonly adjusted options:
 Advanced options:
 
 ```text
--k K
+-k K for Kmers
 -s-reference Sketch size for the skeleton genomes set
 -s-placement Sketch size for the placement genomes set
 --max-skeleton-genomes MAX_SKELETON_GENOMES
@@ -151,7 +153,7 @@ For the complete list of options:
 phylopack batch --help
 ```
 
-## Real-world application: Compressing the AllTheBacteria collection
+### Real-world application: Computing genome orderings and compression-ready batches for AllTheBacteria v2025-05
 
 On the AllTheBacteria (ATB) collection [2], containing millions of genomes, PhyloPack was used to generate phylogeny-aware genome orderings and batches prior to compression.
 
