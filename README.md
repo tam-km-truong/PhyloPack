@@ -9,7 +9,7 @@ It first computes a global genome ordering that places similar genomes close tog
 Using the ATB 2024-08 release [2] (approx. 2.4 million genomes):
 
 - **< 15 GB** using MBGC [4] for major pathogenic species (~93% of the collection).
-- **~33 GB** using AGC [3] while retaining fast random-access capabilities.
+- **~33 GB** using AGC [3] which supports random-access capabilities.
 
 These results were obtained using the workflow described below.
 
