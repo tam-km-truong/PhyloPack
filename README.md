@@ -1,19 +1,19 @@
 # PhyloPack
 
-**PhyloPack** is a protocol to facilitate the handling of million-genomes scale bacterial collections.
+**PhyloPack** is a protocol to facilitate the handling of million-genomes scale bacterial collections by taking advantage of phylogenetic relationship between genomes [1].
 
-It first computes a global genome ordering that places similar genomes close together, then partitions this ordering into batches suitable for downstream applications such as compression, exact k-mer indexing, or distributed processing. The approach uses a skeleton phylogeny built from a subset of reference genomes and subsequently places remaining genomes onto this backbone.
+It first computes a global genome ordering that places similar genomes close together, then partitions this ordering into batches suitable for downstream applications such as compression, exact k-mer indexing, or distributed processing. The approach uses a skeleton phylogeny built from a subset of skeleton genomes and subsequently places remaining genomes onto this backbone.
 
-### Key results:
+### Key results
 
-Using the ATB 2024-08 release (approx. 2.4 million genomes):
+Using the ATB 2024-08 release [2] (approx. 2.4 million genomes):
 
-- **< 15 GB** using MBGC [cite here] for major pathogenic species (~93% of the collection).
-- **~33 GB** using AGC [cite here] while retaining fast random-access capabilities.
+- **< 15 GB** using MBGC [4] for major pathogenic species (~93% of the collection).
+- **~33 GB** using AGC [3] while retaining fast random-access capabilities.
 
 These results were obtained using the workflow described below.
 
-## Contents:
+## Contents
 - Installation
 - Quick Example
 - Main commands
@@ -32,7 +32,7 @@ pip install .
 * `Python >= 3.8`
 * `attotree`
 
-attotree can be installed through Bioconda:
+attotree [5] can be installed through Bioconda:
 
 ```bash
 conda install -c bioconda -c conda-forge attotree
@@ -48,7 +48,7 @@ Input files should contain one genome path per line:
 ~/data/genome3.fa
 ```
 
-### High-level Workflow
+### High-level protocal
 
 1. Compute a global genome ordering using `phylopack preorder`.
 2. Split the ordered list into batches using `phylopack batch`.
@@ -69,7 +69,7 @@ phylopack batch tests/data/genomes.txt -o debug/ -s 2 -v
 
 Output: multiple batch files containing contiguous segments of the ordered genome list.
 
-## Main command:
+## Main commands
 
 ### Genome ordering
 
@@ -105,13 +105,9 @@ Advanced options:
 ```text
 -k K
 -s-reference Sketch size for the skeleton genomes set
--s-placement Sketch size the the placement genomes set
+-s-placement Sketch size for the placement genomes set
 --max-skeleton-genomes MAX_SKELETON_GENOMES
 --min-skeleton-genomes MIN_SKELETON_GENOMES
---seed SEED
---statistic
---statistic-file-type {json,csv}
---debug
 [...]
 ```
 
@@ -157,7 +153,7 @@ phylopack batch --help
 
 ## Real-world application: Compressing the AllTheBacteria collection
 
-On the AllTheBacteria (ATB) collection [cite here], containing millions of genomes, PhyloPack was used to generate phylogeny-aware genome orderings and batches prior to compression.
+On the AllTheBacteria (ATB) collection [2], containing millions of genomes, PhyloPack was used to generate phylogeny-aware genome orderings and batches prior to compression.
 
 Dataset scale - ATB version 2025-05:
 
@@ -167,7 +163,7 @@ Dataset scale - ATB version 2025-05:
 
 ### Species clustering
 
-First, download the ATB metadata table [link here].
+First, download the ATB metadata table [[OSF File-list](https://osf.io/zxfmy/files/7dpbh)].
 
 Genomes are grouped by species using the helper script in `suppl_scripts/species_clustering`:
 
@@ -211,9 +207,6 @@ phylopack preorder \
     --max-skeleton-genomes 20000 \
     --min-skeleton-genomes 10000 \
     -o S_enterica_cluster_global_ordered.txt \
-    -v \
-    --statistic \
-    --debug
 ```
 
 In this example, the skeleton set size is controlled by three parameters:
@@ -228,6 +221,7 @@ For example, the *S. enterica* cluster contains approximately 700k genomes. With
 
 For clusters requiring genome placement, an additional refinement step is performed after the initial global ordering. This improves local ordering accuracy within placement-heavy clusters without requiring phylogenetic inference on the entire dataset.
 
+Refinement is relevant when the cluster is large enough that genome placement was used during the initial ordering step. For smaller clusters where all genomes were included in the skeleton phylogeny, this step can be skipped.
 
 The ordered genome list is divided into non-overlapping windows of 5k genomes. 
 
@@ -290,7 +284,6 @@ for f in ~/ATB/final_batches/*; do
         -b 500 \
         -s 1500 \
         -t [Thread] \
-        -v 2 \
         -o ~/ATB/results/agc/$(basename "$f" .txt).agc \
         -i "$f" \
         "$ref"
@@ -301,3 +294,13 @@ The resulting AGC archives can then be used for downstream storage and retrieval
 
 ## Bibliography:
 
+[1] Břinda, Karel, Leandro Lima, Simone Pignotti, Natalia Quinones-Olvera, Kamil Salikhov, Rayan Chikhi, Gregory Kucherov, Zamin Iqbal, and Michael Baym. 2025. “Efficient and Robust Search of Microbial Genomes via Phylogenetic Compression.” Nature Methods 22 (4): 692–97.
+
+[2] Hunt, Martin, Leandro Lima, Daniel Anderson, Jane Hawkey, Wei Shen, John Lees, and Zamin Iqbal. 2024. “AllTheBacteria - All Bacterial Genomes Assembled, Available and Searchable.” bioRxiv. https://doi.org/10.1101/2024.03.08.584059.
+
+[3] Deorowicz, Sebastian, Agnieszka Danek, and Heng Li. 2023. “AGC: Compact Representation of Assembled Genomes with Fast Queries and Updates.” Bioinformatics (Oxford, England) 39 (3): btad097.
+
+[4] Kowalski, Tomasz M. 2026. “MBGC2: Boosting Compression via Efficient Encoding of Approximate Matches in Genome Collections.” GigaScience 15 (giag008): giag008.
+
+[5] Břinda, Karel. 2024. "attotree 0.1.6." Zenodo.
+https://doi.org/10.5281/zenodo.10950480.
