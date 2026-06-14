@@ -1,6 +1,6 @@
 # PhyloPack
 
-**PhyloPack** is a protocol to facilitate the handling of million-genomes scale bacterial collections by taking advantage of phylogenetic relationship between genomes [1].
+**PhyloPack** is a protocol to facilitate the handling of million-genomes scale bacterial collections by taking advantage of phylogenetic relationships between genomes [1].
 
 It first computes a global genome ordering that places similar genomes close together, then partitions this ordering into batches suitable for downstream applications such as compression, exact k-mer indexing, or distributed processing. The approach uses a skeleton phylogeny built from a subset of skeleton genomes and subsequently places remaining genomes onto this backbone.
 
@@ -48,7 +48,7 @@ Input files should contain one genome path per line:
 ~/data/genome3.fa
 ```
 
-### High-level protocal
+### High-level protocol
 
 1. Compute a global genome ordering using `phylopack preorder`.
 2. Split the ordered list into batches using `phylopack batch`.
@@ -227,7 +227,7 @@ The ordered genome list is divided into non-overlapping windows of 5k genomes.
 
 This keeps each local phylogenetic inference computationally manageable while preserving the global-scale ordering produced by PhyloPack.
 
-For each window, a local phylogenetic tree is inferred using Attotree:
+For each window, a local phylogenetic tree is inferred using Attotree [5]:
 
 ```bash
 attotree \
@@ -271,6 +271,8 @@ phylopack batch \
 The target size is 5000 for most clusters, except for clusters where higher diversity is expected (e.g. unknown-species clusters and the `remainder` pseudo-cluster), where the target size is reduced to 500.
 This step aims to create contiguous batches while preserving the locality established by the ordering process.
 
+The target size is application-specific. When random access is prioritized, smaller batches are preferred. When storage efficiency is prioritized, larger batches typically provide better compression ratios.
+
 ### Compress each batch with AGC
 
 Each batch is compressed independently using AGC. The first genome in the batch is used as the reference genome.
@@ -302,5 +304,5 @@ The resulting AGC archives can then be used for downstream storage and retrieval
 
 [4] Kowalski, Tomasz M. 2026. “MBGC2: Boosting Compression via Efficient Encoding of Approximate Matches in Genome Collections.” GigaScience 15 (giag008): giag008.
 
-[5] Břinda, Karel. 2024. "attotree 0.1.6." Zenodo.
+[5] Břinda, Karel. 2024. attotree 0.1.6. Zenodo.
 https://doi.org/10.5281/zenodo.10950480.
