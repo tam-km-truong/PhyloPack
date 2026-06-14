@@ -25,7 +25,7 @@ def _add_common_args(parser):
     )
     parser.add_argument("--seed", type=int, help="Random seed for shuffling (default: current timestamp)")
     parser.add_argument("-k", type=int, default=21, help="K-mer size (default: 21)")
-    parser.add_argument("-s-reference", type=int, default=10000, help="Sketch size for reference genomes (default: 10000)")
+    parser.add_argument("-s-reference", type=int, default=10000, help="Sketch size for skeleton genomes (default: 10000)")
     parser.add_argument("-s-placement", type=int, default=1000, help="Sketch size placement(default: 1000)")
     parser.add_argument("-t", type=int, default=10, help="Threads (default: 10)")
     parser.add_argument("-m", choices=["nj", "upgma"], default="nj", help="Tree method (default: nj)")
