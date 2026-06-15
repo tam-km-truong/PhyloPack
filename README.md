@@ -6,11 +6,11 @@ Its primary output is a global genome ordering that places similar genomes close
 
 ### Key results
 
-Using PhyloPack, we generated evolutionary-based genome orderings for the ATB 2024-08 release [2] (approximately 2.4 million genomes).
+Using PhyloPack, we computed evolutionary-based genome orderings for the ATB 2024-08 release [2] (approximately 2.4 million genomes).
 
-When these orderings were used for genome compression:
+When these orderings were used for genome compression, for major species (~93% of the collection):
 
-- **< 15 GB** using MBGC [4] for major pathogenic species (~93% of the collection).
+- **< 15 GB** using MBGC [4].
 - **~33 GB** using AGC [3] which supports random-access capabilities.
 
 These results were obtained using the workflow described below.
@@ -266,7 +266,6 @@ phylopack batch \
     -o ~/ATB/final_batches/ \
     --target-size 5000 \
     --batch-name cluster_ \
-    -v \
     cluster_refined_order.txt
 ```
 
