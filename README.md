@@ -1,6 +1,6 @@
 # PhyloPack
 
-**PhyloPack** is a protocol to facilitate the handling of million-genomes scale bacterial collections by taking advantage of phylogenetic relationships between genomes [1].
+**PhyloPack** is a tool for protocols facilitating the handling of million-genomes scale bacterial collections by taking advantage of phylogenetic relationships between genomes [1].
 
 Its primary output is a global genome ordering that places similar genomes close together, then this ordering could be partitioned into batches suitable for downstream applications such as compression, exact k-mer indexing, or distributed processing. The approach uses a skeleton phylogeny built from a subset of skeleton genomes and subsequently places remaining genomes onto this backbone.
 
@@ -10,8 +10,8 @@ Using PhyloPack, we computed evolutionary-based genome orderings for the ATB 202
 
 When these orderings were used for genome compression, for major species (~93% of the collection):
 
-- **< 15 GB** using MBGC [4].
-- **~33 GB** using AGC [3] which supports random-access capabilities.
+- **< 15 GB** using MBGC [4] (~7kb/genome).
+- **~33 GB** using AGC [3] which supports random-access capabilities (14kb/genome).
 
 These results were obtained using the workflow described below.
 
@@ -246,7 +246,7 @@ python phylopack/preorder/postprocess_tree.py \
     --ladderize \
     --name-internals \
     -l ~/leaves/leaves_order.txt \
-    ~/tree/tree.nw -
+    ~/tree/luster_window_1.nw -
 ```
 
 The refined window orderings are concatenated to produce the final ordering:
