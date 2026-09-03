@@ -16,10 +16,17 @@ When these orderings were used for genome compression, for major species (~93% o
 These results were obtained using the workflow described below.
 
 ## Contents
+- Contact
 - Installation
 - Quick Example
 - Main commands
 - Real application: Global ordering of ATB for compression using AGC
+
+## Contact
+If you have questions, issues, or feature requests regarding PhyloPack:
+- **Author:** Tam Truong
+- **Email:** `khac-minh-tam.truong@irisa.fr`
+- **GitHub Issues:** [github.com/tam-km-truong/phylopack/issues](https://github.com/tam-km-truong/phylopack/issues)
 
 ## Installation
 
