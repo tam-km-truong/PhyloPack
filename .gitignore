@@ -55,3 +55,4 @@ docs/_build/
 tests/.DS_Store
 .gitignore
 tests/data/.DS_Store
+.vscode/settings.json
