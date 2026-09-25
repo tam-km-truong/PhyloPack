@@ -1,6 +1,7 @@
 output/*
 mock_data/*
 debug/*
+tests/data/synthetic/*
 .DS_Store
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -8,7 +8,7 @@ import csv
 import resource
 from pathlib import Path
 import sys
-from phylopack.preorder.postprocess_tree import run as postprocesstree
+from phylopack.core_infer_linearize.postprocess_tree import run as postprocesstree
 
 def add_tree_args(parser):
     parser.add_argument('input_genomes', help='Path to the input list of genomes')

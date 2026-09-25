@@ -6,12 +6,12 @@ import json
 import csv
 from pathlib import Path
 
-from phylopack.preorder.split_cluster import run_split
-from phylopack.preorder.py_attotree import run_attotree
-from phylopack.preorder.placement import run_placement
+from phylopack.meso.split_cluster import run_split
+from phylopack.core_infer_linearize.py_attotree import run_attotree
+from phylopack.meso.placement import run_placement
 
 def add_preorder_parser(subparsers):
-    preorder_parser = subparsers.add_parser("preorder", help="Run full pipeline")
+    preorder_parser = subparsers.add_parser("preorder", aliases=["meso-order"], help="Run full pipeline")
     _add_common_args(preorder_parser)
     preorder_parser.set_defaults(func=run_preorder_pipeline)
 

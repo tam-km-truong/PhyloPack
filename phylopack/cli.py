@@ -2,7 +2,7 @@
 import shutil
 import sys
 import argparse
-from phylopack.preorder.preorder import add_preorder_parser
+from phylopack.meso.preorder import add_preorder_parser
 from phylopack.batch.batch import add_batch_parser
 
 
@@ -16,7 +16,7 @@ def main():
     parser = argparse.ArgumentParser(prog="phylopack", description="Phylopack CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Add the 'preorder' command from the preorder module
+    # Add the 'meso' command from the preorder module, preorder kept for backward compatibility
     add_preorder_parser(subparsers)
 
     # Add the 'batch' command from the preorder module
