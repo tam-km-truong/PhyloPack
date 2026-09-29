@@ -68,7 +68,17 @@ def concat_stat_files(paths, output_path, file_type="json"):
                     for row in reader:
                         writer.writerow([name] + row)
 
+def check_input(path):
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Input file not found: {path}")
+
+    with open(path, "r") as infile:
+        count = sum(1 for line in infile if line.strip())
+
+    return count > 1
+
 def run_preorder_pipeline(args):
+
     if args.debug:
         tmpdir = os.path.join(os.path.dirname(args.output), "phylopack_tmp")
         os.makedirs(tmpdir, exist_ok=True)
@@ -86,6 +96,15 @@ def run_preorder_pipeline(args):
     output_tree = os.path.join(tmpdir, "tree.nw")
     output_std_tree = os.path.join(tmpdir, "tree_std.nw")
     final_output_tmp = os.path.join(tmpdir, "placement_order.txt")
+
+    if not check_input(args.input_genomes):
+        if args.verbose:
+            print(f"[INFO] <= 1 genome detected. Copying directly to {args.output}")
+        shutil.copyfile(args.input_genomes, args.output)
+        if not args.debug:
+            shutil.rmtree(tmpdir)
+        return
+
 
     split_args = argparse.Namespace(
         input_genomes = args.input_genomes,
