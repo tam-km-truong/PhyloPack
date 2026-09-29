@@ -99,7 +99,7 @@ def run_preorder_pipeline(args):
 
     if not check_input(args.input_genomes):
         if args.verbose:
-            print(f"[INFO] <= 1 genome detected. Copying directly to {args.output}")
+            print(f"[INFO] <= 3 genome detected. Copying directly to {args.output}")
         shutil.copyfile(args.input_genomes, args.output)
         if not args.debug:
             shutil.rmtree(tmpdir)
