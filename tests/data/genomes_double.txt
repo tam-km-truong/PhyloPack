@@ -1,0 +1,2 @@
+./tests/data/fasta_files/SAMN00706777.fa.gz
+./tests/data/fasta_files/SAMN02194289.fa.gz

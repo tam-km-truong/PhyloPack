@@ -75,7 +75,7 @@ def check_input(path):
     with open(path, "r") as infile:
         count = sum(1 for line in infile if line.strip())
 
-    return count > 1
+    return count > 3
 
 def run_preorder_pipeline(args):
 
