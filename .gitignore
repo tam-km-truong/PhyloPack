@@ -53,7 +53,12 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 tests/.DS_Store
-.gitignore
 tests/data/.DS_Store
 tests/data/synthetic
+tests/data/synthetic_exp
+tests/data/synthetic_exp_realistic
 .vscode/settings.json
+tests/plot_empirical_results.py
+tests/run_realistic_simulation.py
+tests/plot_realistic_results.py
+tests/run_synthetic_experiment.py

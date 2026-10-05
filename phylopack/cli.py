@@ -4,6 +4,7 @@ import sys
 import argparse
 from phylopack.preorder.preorder import add_preorder_parser
 from phylopack.batch.batch import add_batch_parser
+from phylopack.preorder.refine_ordering import add_refine_parser
 
 
 def check_dependencies(tools=["mash", "quicktree", "attotree"]):
@@ -21,6 +22,8 @@ def main():
 
     # Add the 'batch' command from the preorder module
     add_batch_parser(subparsers)
+
+    add_refine_parser(subparsers)
 
     args = parser.parse_args()
     args.func(args)

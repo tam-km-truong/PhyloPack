@@ -50,17 +50,17 @@ def load_and_process_tree(
     t = ete3.Tree(in_tree_fn, format=1)
 
     if standardize:
-        info("Standardizing the tree")
+        #info("Standardizing the tree")
         t.standardize()
     if midpoint_outgroup:
-        info("Setting a midpoint outgroup")
+        #info("Setting a midpoint outgroup")
         R = t.get_midpoint_outgroup()
         t.set_outgroup(R)
     if ladderize:
-        info("Ladderizing")
+        #info("Ladderizing")
         t.ladderize()
     if name_internals:
-        info("Automatic naming of internal nodes")
+        #info("Automatic naming of internal nodes")
         t = name_internal_nodes(t)
 
     return t
