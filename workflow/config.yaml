@@ -1,11 +1,19 @@
+# Input and output paths
 input: "tests/data/genomes.txt"
 output: "results/refined_order.txt"
-window_size: 5
-min_size: 4
+
+# Window settings
+window_size: 5000       # Number of genomes per window (e.g. 5000 for 700k list)
+min_size: 10000         # If input < min_size or < 4, copies directly and skips refinement
+
+# Threading per individual tree inference job
+threads_per_job: 5      # Snakemake scales jobs: --cores 90 / 5 threads = 18 parallel jobs
+
+# Intermediate directory for batches, trees, and logs
 work_dir: "results"
 
+# Attotree inference parameters
 attotree:
   k: 21
   sketch_size: 10000
-  threads: 4
-  method: "nj"
+  method: "nj"          # "nj" or "upgma"

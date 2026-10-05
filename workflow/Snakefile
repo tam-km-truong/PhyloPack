@@ -1,109 +1,144 @@
+import math
 import os
 import shutil
-from pathlib import Path
+import sys
 
 configfile: "workflow/config.yaml"
 
-input_genomes = config.get("input", "tests/data/genomes.txt")
-output_refined = config.get("output", "results/refined_order.txt")
-window_size = config.get("window_size", 5000)
-min_size = config.get("min_size", 10000)
+input_file = config.get("input", "tests/data/genomes.txt")
+output_file = config.get("output", "results/refined_order.txt")
+window_size = int(config.get("window_size", 5000))
+min_size = int(config.get("min_size", 10000))
+threads_per_job = int(config.get("threads_per_job", 5))
 work_dir = config.get("work_dir", "results")
 
 attotree_cfg = config.get("attotree", {})
-k_mer = attotree_cfg.get("k", 21)
-sketch_size = attotree_cfg.get("sketch_size", 10000)
-threads_per_window = attotree_cfg.get("threads", 4)
+k_mer = int(attotree_cfg.get("k", 21))
+sketch_size = int(attotree_cfg.get("sketch_size", 10000))
 method = attotree_cfg.get("method", "nj")
 
+# ---------------------------------------------------------------------------
+# Pre-flight check
+# ---------------------------------------------------------------------------
+if not os.path.exists(input_file):
+    sys.exit(f"[ERROR] Input genome file '{input_file}' does not exist.")
 
-rule all:
-    input:
-        output_refined
+if window_size < 4:
+    sys.exit(f"[ERROR] window_size ({window_size}) must be at least 4.")
 
-
-checkpoint split_windows:
-    input:
-        genomes = input_genomes
-    output:
-        batch_dir = directory(os.path.join(work_dir, "batches"))
-    params:
-        window = window_size,
-        min_size = min_size
-    run:
-        import argparse
-        from phylopack.batch.batch import run_batching
-
-        with open(input.genomes) as f:
-            total_genomes = sum(1 for line in f if line.strip())
-
-        os.makedirs(output.batch_dir, exist_ok=True)
-
-        if total_genomes < params.min_size:
-            shutil.copyfile(input.genomes, os.path.join(output.batch_dir, "window_0001.txt"))
-        else:
-            batch_args = argparse.Namespace(
-                input=input.genomes,
-                batch_name="window",
-                output_dir=output.batch_dir,
-                target_size=params.window,
-                verbose=True,
-                digits=4,
-            )
-            run_batching(batch_args)
+with open(input_file) as f:
+    total_genomes = sum(1 for line in f if line.strip())
 
 
-rule process_window:
-    input:
-        window = os.path.join(work_dir, "batches", "window_{batch_id}.txt")
-    output:
-        tree = os.path.join(work_dir, "trees", "window_{batch_id}.nw"),
-        std_tree = os.path.join(work_dir, "trees", "window_{batch_id}_std.nw"),
-        leaf_order = os.path.join(work_dir, "trees", "window_{batch_id}_leaf_order.txt")
-    threads:
-        threads_per_window
-    params:
-        k = k_mer,
-        s = sketch_size,
-        m = method
-    shell:
-        """
-        PYTHONPATH=. python -m phylopack.preorder.py_attotree \
-            {input.window} \
-            -o $(dirname {output.tree}) \
-            -k {params.k} \
-            -s {params.s} \
-            -t {threads} \
-            -m {params.m} \
-            --output-tree {output.tree} \
-            --output-std-tree {output.std_tree} \
-            --leaf-order {output.leaf_order}
-        """
+# ---------------------------------------------------------------------------
+# Case 1: Below min_size or < 4 genomes -> Direct copy (bypass refinement)
+# ---------------------------------------------------------------------------
+if total_genomes < min_size or total_genomes < 4:
+    rule all:
+        input:
+            output_file
 
+    rule bypass_refinement:
+        input:
+            input_file
+        output:
+            output_file
+        log:
+            os.path.join(work_dir, "logs", "bypass_refinement.log")
+        run:
+            os.makedirs(os.path.dirname(output[0]) or ".", exist_ok=True)
+            os.makedirs(os.path.dirname(log[0]) or ".", exist_ok=True)
+            shutil.copyfile(input[0], output[0])
+            with open(log[0], "w") as log_f:
+                log_f.write(
+                    f"[INFO] total_genomes ({total_genomes}) < min_size ({min_size}) "
+                    f"or < 4. Bypassed refinement and copied directly to {output[0]}\n"
+                )
 
-def get_window_leaf_orders(wildcards):
-    batch_dir = checkpoints.split_windows.get(**wildcards).output.batch_dir
-    with open(input_genomes) as f:
-        total = sum(1 for line in f if line.strip())
+# ---------------------------------------------------------------------------
+# Case 2: Large cluster (>= min_size and >= 4) -> Windowed tree refinement
+# ---------------------------------------------------------------------------
+else:
+    num_batches = math.ceil(total_genomes / window_size)
+    BATCH_IDS = [f"{i:04d}" for i in range(1, num_batches + 1)]
 
-    if total < min_size:
-        return [os.path.join(batch_dir, "window_0001.txt")]
+    rule all:
+        input:
+            output_file
 
-    batch_ids = sorted(glob_wildcards(os.path.join(batch_dir, "window_{batch_id}.txt")).batch_id)
-    return [os.path.join(work_dir, "trees", f"window_{bid}_leaf_order.txt") for bid in batch_ids]
+    rule split_windows:
+        input:
+            genomes = input_file
+        output:
+            batches = expand(os.path.join(work_dir, "batches", "window_{batch_id}.txt"), batch_id=BATCH_IDS)
+        params:
+            batch_dir = os.path.join(work_dir, "batches"),
+            window = window_size
+        log:
+            os.path.join(work_dir, "logs", "split_windows.log")
+        shell:
+            """
+            python -m phylopack.batch.batch \
+                {input.genomes} \
+                -o {params.batch_dir} \
+                -s {params.window} \
+                -n window \
+                -d 4 > {log} 2>&1
+            """
 
+    rule process_window:
+        input:
+            window = os.path.join(work_dir, "batches", "window_{batch_id}.txt")
+        output:
+            tree = os.path.join(work_dir, "trees", "window_{batch_id}.nw"),
+            std_tree = os.path.join(work_dir, "trees", "window_{batch_id}_std.nw"),
+            leaf_order = os.path.join(work_dir, "trees", "window_{batch_id}_leaf_order.txt")
+        threads:
+            threads_per_job
+        params:
+            k = k_mer,
+            s = sketch_size,
+            m = method
+        log:
+            os.path.join(work_dir, "logs", "window_{batch_id}.log")
+        shell:
+            """
+            PYTHONPATH=. python -m phylopack.preorder.py_attotree \
+                {input.window} \
+                -o $(dirname {output.tree}) \
+                -k {params.k} \
+                -s {params.s} \
+                -t {threads} \
+                -m {params.m} \
+                --output-tree {output.tree} \
+                --output-std-tree {output.std_tree} \
+                --leaf-order {output.leaf_order} > {log} 2>&1
+            """
 
-rule merge_refined_order:
-    input:
-        get_window_leaf_orders
-    output:
-        output_refined
-    run:
-        os.makedirs(os.path.dirname(output[0]) or ".", exist_ok=True)
-        with open(output[0], "w") as out_f:
-            for window_leaf_file in input:
-                with open(window_leaf_file) as in_f:
-                    for line in in_f:
-                        line = line.strip()
-                        if line:
-                            out_f.write(line + "\n")
+    rule merge_refined_order:
+        input:
+            expand(os.path.join(work_dir, "trees", "window_{batch_id}_leaf_order.txt"), batch_id=BATCH_IDS)
+        output:
+            refined = output_file
+        run:
+            os.makedirs(os.path.dirname(output.refined) or ".", exist_ok=True)
+
+            written_count = 0
+            with open(output.refined, "w") as out_f:
+                for window_file in input:
+                    if not os.path.exists(window_file) or os.path.getsize(window_file) == 0:
+                        raise FileNotFoundError(f"[ERROR] Window leaf order file '{window_file}' is missing or empty.")
+
+                    with open(window_file) as in_f:
+                        for line in in_f:
+                            line = line.strip()
+                            if line:
+                                out_f.write(line + "\n")
+                                written_count += 1
+
+            if written_count != total_genomes:
+                os.remove(output.refined)
+                raise ValueError(
+                    f"[ERROR] Integrity check failed: output has {written_count} genomes, "
+                    f"expected {total_genomes}. Corrupted output removed."
+                )
