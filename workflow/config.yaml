@@ -1,0 +1,11 @@
+input: "tests/data/genomes.txt"
+output: "results/refined_order.txt"
+window_size: 5
+min_size: 4
+work_dir: "results"
+
+attotree:
+  k: 21
+  sketch_size: 10000
+  threads: 4
+  method: "nj"

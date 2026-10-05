@@ -1,0 +1,109 @@
+import os
+import shutil
+from pathlib import Path
+
+configfile: "workflow/config.yaml"
+
+input_genomes = config.get("input", "tests/data/genomes.txt")
+output_refined = config.get("output", "results/refined_order.txt")
+window_size = config.get("window_size", 5000)
+min_size = config.get("min_size", 10000)
+work_dir = config.get("work_dir", "results")
+
+attotree_cfg = config.get("attotree", {})
+k_mer = attotree_cfg.get("k", 21)
+sketch_size = attotree_cfg.get("sketch_size", 10000)
+threads_per_window = attotree_cfg.get("threads", 4)
+method = attotree_cfg.get("method", "nj")
+
+
+rule all:
+    input:
+        output_refined
+
+
+checkpoint split_windows:
+    input:
+        genomes = input_genomes
+    output:
+        batch_dir = directory(os.path.join(work_dir, "batches"))
+    params:
+        window = window_size,
+        min_size = min_size
+    run:
+        import argparse
+        from phylopack.batch.batch import run_batching
+
+        with open(input.genomes) as f:
+            total_genomes = sum(1 for line in f if line.strip())
+
+        os.makedirs(output.batch_dir, exist_ok=True)
+
+        if total_genomes < params.min_size:
+            shutil.copyfile(input.genomes, os.path.join(output.batch_dir, "window_0001.txt"))
+        else:
+            batch_args = argparse.Namespace(
+                input=input.genomes,
+                batch_name="window",
+                output_dir=output.batch_dir,
+                target_size=params.window,
+                verbose=True,
+                digits=4,
+            )
+            run_batching(batch_args)
+
+
+rule process_window:
+    input:
+        window = os.path.join(work_dir, "batches", "window_{batch_id}.txt")
+    output:
+        tree = os.path.join(work_dir, "trees", "window_{batch_id}.nw"),
+        std_tree = os.path.join(work_dir, "trees", "window_{batch_id}_std.nw"),
+        leaf_order = os.path.join(work_dir, "trees", "window_{batch_id}_leaf_order.txt")
+    threads:
+        threads_per_window
+    params:
+        k = k_mer,
+        s = sketch_size,
+        m = method
+    shell:
+        """
+        PYTHONPATH=. python -m phylopack.preorder.py_attotree \
+            {input.window} \
+            -o $(dirname {output.tree}) \
+            -k {params.k} \
+            -s {params.s} \
+            -t {threads} \
+            -m {params.m} \
+            --output-tree {output.tree} \
+            --output-std-tree {output.std_tree} \
+            --leaf-order {output.leaf_order}
+        """
+
+
+def get_window_leaf_orders(wildcards):
+    batch_dir = checkpoints.split_windows.get(**wildcards).output.batch_dir
+    with open(input_genomes) as f:
+        total = sum(1 for line in f if line.strip())
+
+    if total < min_size:
+        return [os.path.join(batch_dir, "window_0001.txt")]
+
+    batch_ids = sorted(glob_wildcards(os.path.join(batch_dir, "window_{batch_id}.txt")).batch_id)
+    return [os.path.join(work_dir, "trees", f"window_{bid}_leaf_order.txt") for bid in batch_ids]
+
+
+rule merge_refined_order:
+    input:
+        get_window_leaf_orders
+    output:
+        output_refined
+    run:
+        os.makedirs(os.path.dirname(output[0]) or ".", exist_ok=True)
+        with open(output[0], "w") as out_f:
+            for window_leaf_file in input:
+                with open(window_leaf_file) as in_f:
+                    for line in in_f:
+                        line = line.strip()
+                        if line:
+                            out_f.write(line + "\n")
